@@ -1,0 +1,143 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef int Dato;
+
+struct Node{
+    Dato value;    
+    struct Node* next;
+};
+
+typedef struct{
+    struct Node* head;
+    struct Node* tail;
+    int size;
+} Queue;
+
+
+void createQueue(Queue *c, int *error);
+void queue(Queue *c, int *error, Dato value);
+Dato deQueue(Queue *c, int *error);
+bool isEmpty(Queue c, int *error);
+void clearQueue(Queue *c,int *error);
+void printQueue(Queue c,int *error);
+void sortQueue(struct Node* node,int *error);
+void copyQueue(Queue *c, Queue *copy, int *error);
+void deleteQueue(Queue *c,int *error);
+
+
+void createQueue(Queue *c, int *error){
+    c->head=NULL;
+    c->tail=NULL;
+    c->size=0;
+    *error=0;    
+}
+
+void queue(Queue *c, int *error, Dato value){
+    struct Node* newNode=(struct Node*)malloc(sizeof(struct Node));    
+    if(newNode==NULL){
+        perror("No memory.");
+        *error=-1;
+    }
+    if(isEmpty(*c,error)){
+        c->head=newNode;
+        c->tail=newNode;
+    } else{        
+        c->tail->next=newNode;
+        c->tail=newNode;
+    }
+    newNode->value=value;
+    newNode->next=NULL;
+    c->size++;
+    *error=0;       
+}
+
+
+Dato deQueue(Queue *c, int *error){
+    Dato datoext;
+    if(isEmpty(*c,error)){
+        perror("Queue is empty.");
+        *error=-2;
+    }      
+    datoext=c->head->value;
+    if (c->size==1){ 
+        c->head=NULL;         
+        c->tail=NULL;
+    } else{            
+        c->head=c->head->next;
+    }       
+    
+    c->size--;
+    *error=0;
+    return datoext;
+}
+
+bool isEmpty(Queue c, int *error){
+    if(c.size==0){
+        return true;
+    } else{
+        return false;
+    }
+    *error=0;
+}
+
+void clearQueue(Queue *c,int *error){
+    if(isEmpty(*c,error)){
+        perror("Queue is already empty.");
+        *error=-1;
+    } else {
+        while(c->head!=NULL){
+            deQueue(c,error);
+        }
+        puts("Queue has been emptied.");
+    }
+}
+
+void recorrrerCola(Queue c,int *error){    
+    if(isEmpty(c,error)){
+        perror("Queue is empty.");
+        *error=-2;
+    }else {
+    struct Node* nodoaux;
+    nodoaux = c.head;
+    for(int i=0;i<c.size;i++){
+        printf("%d. %d\n",(i+1),nodoaux->value);
+        nodoaux=nodoaux->next;        
+    } 
+    }   
+}
+
+void sortQueue(struct Node *node,int *error){
+    struct Node* aux=node;
+    while(aux->next!=NULL){
+        if(node->value>aux->next->value){
+            Dato dato;
+            dato=node->value;
+            node->value=aux->next->value;
+            aux->next->value=dato;
+            
+        }      
+        aux=aux->next;  
+    }
+    if(node->next!=NULL){
+        sortQueue(node->next,error);
+    }
+}
+
+
+void copyQueue(Queue *c, Queue *copy, int *error){
+    struct Node* aux=c->head;
+    for(int i=0;i<c->size;i++){
+        queue(copy,error,aux->value);
+        aux=aux->next;
+    }   
+
+}
+
+void deleteQueue(Queue *c,int *error){
+    clearQueue(c,error);
+    free(c);
+}
+
