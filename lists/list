@@ -54,7 +54,7 @@ void insertLeft(List* l,Dato value,int *error){
             aux->pos=aux->pos+1;
             aux=aux->next;
         }
-    }
+    } 
 }
 
 void insertRight(List* l,Dato value,int *error){ 
