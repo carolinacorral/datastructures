@@ -1,0 +1,278 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+
+typedef int Dato;
+
+struct Node{
+    Dato value;
+    struct Node* next;
+    int pos;
+};
+
+typedef struct Node* List;
+
+void createList(List* l, int *error);
+void insertLeft(List* l,Dato value,int *error);
+void insertRight(List* l,Dato value,int *error);
+Dato extractLeft(List* l,int *error);
+Dato extractRight(List* l,int *error);
+void insertN(List* l, Dato value,int pos,int *error);
+Dato extractN(List* l, Dato value, int pos,int *error);
+int maxPos(List* l,int *error);
+void checkHead(List* l,int *error);
+void updateN(List* l,Dato value, int pos,int *error);
+void printList(List* l,int *error);
+void clearList(List* l,int *error);
+void deleteList(List* l,int *error);
+void copyList(List* l, List* copy,int *error);
+
+
+void createList(List* l,int *error){
+    *l=NULL;
+    *error=0;
+    puts("Created.");
+}
+
+void insertLeft(List* l,Dato value,int *error){ 
+    struct Node* newNode=(struct Node*)malloc(sizeof(struct Node));
+    if(newNode==NULL){
+        perror("No memory");
+        *error=-1;
+    }
+    newNode->pos=0;
+    newNode->value=value;
+    if(*l==NULL){ //If list is empty next node is NULL
+        newNode->next=NULL;
+        (*l)=newNode;
+    } else{ 
+        newNode->next=(*l); // Next of new node is head of list
+        (*l)=newNode; 
+        struct Node* aux=newNode->next;
+        while(aux!=NULL){ //Reasign positions
+            aux->pos=aux->pos+1;
+            aux=aux->next;
+        }
+    }
+}
+
+void insertRight(List* l,Dato value,int *error){ 
+    struct Node* newNode=(struct Node*)malloc(sizeof(struct Node));
+    if(newNode==NULL){
+        perror("No memory");
+        *error=-1;
+    }   
+    if(*l==NULL){
+        newNode->next=NULL;
+        (*l)=newNode;
+        newNode->pos=0;
+        newNode->value=value;
+    } else{
+        struct Node* aux=(*l);
+        while(aux->next!=NULL){
+            aux=aux->next;
+        }
+        aux->next=newNode;
+        newNode->next=NULL;
+        newNode->pos=aux->pos+1;
+        newNode->value=value;
+    }
+    
+    *error=0;    
+}
+
+void printList(List* l,int *error){ 
+    if(*l==NULL){
+        perror("List is empty.");
+        *error=-1;
+        
+    }      
+    struct Node* nodoaux=(*l);
+      
+    while(nodoaux!=NULL){
+        printf("%d. %d\n",(nodoaux->pos+1),nodoaux->value);
+        nodoaux=nodoaux->next;    
+        
+    }
+}
+
+Dato extractLeft(List* l,int *error){ 
+    if(*l==NULL){
+        perror("List is empty");
+        *error=-2;
+    }
+    Dato datoext=(*l)->value;
+    if(maxPos(l,error)==0){ //If there's only one element list becomes NULL
+        (*l)=NULL;
+    } else {    
+        struct Node* aux1=(*l);
+        (*l)=(*l)->next;
+        aux1->next=NULL;
+        free(aux1);
+        struct Node* aux2=(*l);
+        while(aux2!=NULL){ //Reasign positions
+            aux2->pos=aux2->pos-1;
+            aux2=aux2->next;
+        }
+        *error=0;
+    }
+    return datoext;
+}
+
+Dato extractRight(List* l,int *error){
+    if(*l==NULL){
+      perror("List is empty");
+        *error=-2;  
+    }
+    else {
+        Dato datoext;
+        if((*l)->next==NULL){
+          datoext=(*l)->value;  
+          (*l)=NULL;
+          puts("a");
+        } else{
+        struct Node* aux=(*l); //Last value
+        struct Node* aux2; //Second to last value
+        while(aux->next!=NULL){
+            aux2=aux;
+            aux=aux->next;
+        }       
+        
+        datoext=aux->value; //Extracts last value
+        aux2->next=NULL; //Second to last value points to NULL
+        free(aux); 
+        }
+        return datoext;
+        
+        
+    }
+}
+
+void insertN(List* l, Dato value,int pos,int *error){
+    struct Node* newNode=(struct Node*)malloc(sizeof(struct Node));
+    if(newNode==NULL){
+        perror("No memory");
+        *error=-1;
+    }
+    if(pos==0 && *l==NULL){ //If N is 0 and list is empty
+        newNode->value=value;
+        newNode->pos=pos;
+        newNode->next=NULL;
+        (*l)=newNode;
+    }
+    else if(pos>maxPos(l,error)){
+        perror("Out of range");
+        *error=-3;
+    } else{
+        newNode->value=value;
+        newNode->pos=pos;
+        struct Node* aux=(*l);
+        struct Node* aux2;
+        while(pos-1>aux->pos){ //Stops on previous position     
+            aux=aux->next;
+        }
+        aux2=aux->next;
+        aux->next=newNode;
+        newNode->next=aux2;
+        while(aux2!=NULL){
+            aux2->pos=aux2->pos+1;
+            aux2=aux2->next;
+        }
+    }
+    
+}
+
+Dato extractN(List* l, Dato value, int pos,int *error){
+    Dato datoext;
+    if(*l==NULL){
+        perror("List is empty");
+        *error=-2;
+    }
+    else if(pos>maxPos(l,error)){
+        perror("Out of range");
+        *error=-3; 
+    } else if(pos==0 && maxPos(l,error)==0){
+        datoext=(*l)->value;
+        (*l)=NULL;
+    } else{
+        struct Node* nIzq=(*l);
+        struct Node* n;
+        struct Node* nDer;
+        while(pos-1>nIzq->pos){ //Stops one positions before      
+            nIzq=nIzq->next;
+        }
+        n=nIzq->next; //N value
+        nDer=n->next; //Value after N
+        datoext=n->value;
+        nIzq->next=nDer;
+        n->next=NULL;
+        free(n);
+        while(nDer!=NULL){
+            nDer->pos=nDer->pos-1;
+            nDer=nDer->next;
+        }
+        return datoext;
+    }
+
+}
+
+void checkHead(List* l,int *error){
+    Dato head=(*l)->value;
+    printf("Head: %d\n",head);
+}
+
+void clearList(List* l,int *error){
+    struct Node* aux=(*l);
+    while(aux->next!=NULL){
+        extractLeft(l,error);        
+    }    
+}
+
+void deleteList(List* l,int *error){
+    clearList(l,error);
+    free(l);
+}
+
+void copyList(List* l, List* copy,int *error){
+    struct Node* aux=(*l);
+    while(aux!=NULL){
+        insertRight(copy,aux->value,error);
+        aux=aux->next;
+    }
+}
+
+void updateN(List* l,Dato value, int pos,int *error){
+    if (*l==NULL){
+        perror("List is empty");
+        *error=-2;
+    } else {
+        if(pos>maxPos(l,error)){
+            perror("Out of range");            
+        } 
+        else{
+            struct Node* aux=(*l);
+            while(aux->pos!=pos){
+                aux=aux->next;
+            }
+            Dato viejo=aux->value;
+            aux->value=value;
+            printf("Value %d. %d updated to %d\n",pos,viejo,value);
+            free(viejo);
+        }
+
+    }
+}
+
+int maxPos(List* l,int *error){
+    if(*l==NULL){        
+        perror("List is empty");
+        *error=-2;
+    }
+    struct Node* aux1=(*l);
+    while(aux1->next!=NULL){
+        aux1=aux1->next;
+    }
+    int tam=aux1->pos;
+    return tam;
+}
